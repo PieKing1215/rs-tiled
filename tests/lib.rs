@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::path::Path;
-use tiled::{parse, parse_file, parse_tileset, Map, PropertyValue, TiledError, LayerData};
+use tiled::{parse, parse_file, parse_tileset, LayerData, Map, PropertyValue, TiledError};
 
 fn read_from_file(p: &Path) -> Result<Map, TiledError> {
     let file = File::open(p).unwrap();
@@ -20,7 +20,7 @@ fn test_gzip_and_zlib_encoded_and_raw_are_the_same() {
     assert_eq!(z, g);
     assert_eq!(z, r);
     assert_eq!(z, c);
-    
+
     if let LayerData::Finite(tiles) = &c.layers[0].tiles {
         assert_eq!(tiles.len(), 100);
         assert_eq!(tiles[0].len(), 100);
@@ -51,7 +51,7 @@ fn test_just_tileset() {
 
 #[test]
 fn test_infinite_tileset() {
-    let r = read_from_file_with_path(&Path::new("assets/tiled_base64_zlib_infinite.tmx")).unwrap();    
+    let r = read_from_file_with_path(&Path::new("assets/tiled_base64_zlib_infinite.tmx")).unwrap();
 
     if let LayerData::Infinite(chunks) = &r.layers[0].tiles {
         assert_eq!(chunks.len(), 4);
@@ -63,7 +63,6 @@ fn test_infinite_tileset() {
         assert_eq!(chunks[&(-32, 32)].height, 32);
     } else {
         assert!(false, "It is wrongly recognised as a finite map");
-
     }
 }
 
@@ -135,7 +134,7 @@ fn test_tileset_property() {
 #[test]
 fn test_flipped_gid() {
     let r = read_from_file_with_path(&Path::new("assets/tiled_flipped.tmx")).unwrap();
-    
+
     if let LayerData::Finite(tiles) = &r.layers[0].tiles {
         let t1 = tiles[0][0];
         let t2 = tiles[0][1];
@@ -159,7 +158,6 @@ fn test_flipped_gid() {
     } else {
         assert!(false, "It is wrongly recognised as an infinite map");
     }
-    
 }
 
 #[test]
@@ -172,5 +170,30 @@ fn test_ldk_export() {
         assert_eq!(tiles[1][0].gid, 1);
     } else {
         assert!(false, "It is wrongly recognised as an infinite map");
+    }
+}
+
+#[test]
+fn test_parallax_layers() {
+    let r = read_from_file_with_path(&Path::new("assets/tiled_parallax.tmx")).unwrap();
+    for (i, layer) in r.layers.iter().enumerate() {
+        match i {
+            0 => {
+                assert_eq!(layer.name, "Background");
+                assert_eq!(layer.parallax_x, 0.5);
+                assert_eq!(layer.parallax_y, 0.75);
+            }
+            1 => {
+                assert_eq!(layer.name, "Middle");
+                assert_eq!(layer.parallax_x, 1.0);
+                assert_eq!(layer.parallax_y, 1.0);
+            }
+            2 => {
+                assert_eq!(layer.name, "Foreground");
+                assert_eq!(layer.parallax_x, 2.0);
+                assert_eq!(layer.parallax_y, 2.0);
+            }
+            _ => panic!("unexpected layer"),
+        }
     }
 }
