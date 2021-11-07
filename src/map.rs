@@ -124,7 +124,7 @@ impl Map {
 
         let id = id - tileset.first_gid;
         let columns =
-            (img.width as u32 - 2 * tileset.margin) / (tileset.spacing + tileset.tile_width);
+            img.width as u32 / (tileset.spacing + tileset.tile_width);
 
         // coordinates in tiles
         let x = id % columns;
