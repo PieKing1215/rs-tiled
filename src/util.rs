@@ -279,7 +279,7 @@ pub(crate) fn convert_to_tile(all: &Vec<u8>, width: u32) -> Vec<Vec<LayerTile>> 
     data
 }
 
-pub(crate) fn parse_impl<R: Read>(reader: R, map_path: Option<&Path>) -> Result<Map, TiledError> {
+pub(crate) fn parse_impl<R: Read>(reader: R, external_file_loader: impl FnMut(&str)->Result<Vec<u8>, TiledError>) -> Result<Map, TiledError> {
     let mut parser = EventReader::new(reader);
     loop {
         match parser.next().map_err(TiledError::XmlDecodingError)? {
@@ -287,7 +287,7 @@ pub(crate) fn parse_impl<R: Read>(reader: R, map_path: Option<&Path>) -> Result<
                 name, attributes, ..
             } => {
                 if name.local_name == "map" {
-                    return Map::new(&mut parser, attributes, map_path);
+                    return Map::new(&mut parser, attributes, external_file_loader);
                 }
             }
             XmlEvent::EndDocument => {

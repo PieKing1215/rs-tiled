@@ -35,7 +35,7 @@ impl Map {
     pub(crate) fn new<R: Read>(
         parser: &mut EventReader<R>,
         attrs: Vec<OwnedAttribute>,
-        map_path: Option<&Path>,
+        mut external_file_loader: impl FnMut(&str)->Result<Vec<u8>, TiledError>,
     ) -> Result<Map, TiledError> {
         let ((c, infinite), (v, o, w, h, tw, th)) = get_attrs!(
             attrs,
@@ -62,7 +62,7 @@ impl Map {
         let mut layer_index = 0;
         parse_tag!(parser, "map", {
             "tileset" => |attrs| {
-                tilesets.push(Tileset::new(parser, attrs, map_path)?);
+                tilesets.push(Tileset::new(parser, attrs, &mut external_file_loader)?);
                 Ok(())
             },
             "layer" => |attrs| {

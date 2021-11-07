@@ -24,9 +24,9 @@ impl Tileset {
     pub(crate) fn new<R: Read>(
         parser: &mut EventReader<R>,
         attrs: Vec<OwnedAttribute>,
-        map_path: Option<&Path>,
+        external_file_loader: impl FnMut(&str)->Result<Vec<u8>, TiledError>,
     ) -> Result<Tileset, TiledError> {
-        Tileset::new_internal(parser, &attrs).or_else(|_| Tileset::new_reference(&attrs, map_path))
+        Tileset::new_internal(parser, &attrs).or_else(|_| Tileset::new_reference(&attrs, external_file_loader))
     }
 
     fn new_internal<R: Read>(
@@ -83,7 +83,7 @@ impl Tileset {
 
     fn new_reference(
         attrs: &Vec<OwnedAttribute>,
-        map_path: Option<&Path>,
+        mut external_file_loader: impl FnMut(&str)->Result<Vec<u8>, TiledError>,
     ) -> Result<Tileset, TiledError> {
         let ((), (first_gid, source)) = get_attrs!(
             attrs,
@@ -95,14 +95,8 @@ impl Tileset {
             TiledError::MalformedAttributes("tileset must have a firstgid, name tile width and height with correct types".to_string())
         );
 
-        let tileset_path = map_path.ok_or(TiledError::Other("Maps with external tilesets must know their file location.  See parse_with_path(Path).".to_string()))?.with_file_name(source);
-        let file = File::open(&tileset_path).map_err(|_| {
-            TiledError::Other(format!(
-                "External tileset file not found: {:?}",
-                tileset_path
-            ))
-        })?;
-        Tileset::new_external(file, first_gid)
+        let tileset_bytes = external_file_loader(&source)?;
+        Tileset::new_external(tileset_bytes.as_slice(), first_gid)
     }
 
     pub(crate) fn new_external<R: Read>(file: R, first_gid: u32) -> Result<Tileset, TiledError> {
