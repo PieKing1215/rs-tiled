@@ -122,7 +122,7 @@ impl Map {
         let tileset = self.get_tileset_by_gid(id)?;
         let img = tileset.images.get(0)?; // we suppose there is only 1 image per tileset
 
-        let id = id - 1;
+        let id = id - tileset.first_gid;
         let columns =
             (img.width as u32 - 2 * tileset.margin) / (tileset.spacing + tileset.tile_width);
 
