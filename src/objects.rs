@@ -15,6 +15,8 @@ pub struct ObjectGroup {
     pub visible: bool,
     pub objects: Vec<Object>,
     pub colour: Option<Colour>,
+    pub parallax_x: f32,
+    pub parallax_y: f32,
     /**
      * Layer index is not preset for tile collision boxes
      */
@@ -28,13 +30,15 @@ impl ObjectGroup {
         attrs: Vec<OwnedAttribute>,
         layer_index: Option<u32>,
     ) -> Result<ObjectGroup, TiledError> {
-        let ((o, v, c, n), ()) = get_attrs!(
+        let ((o, v, c, n, px, py), ()) = get_attrs!(
             attrs,
             optionals: [
                 ("opacity", opacity, |v:String| v.parse().ok()),
                 ("visible", visible, |v:String| v.parse().ok().map(|x:i32| x == 1)),
                 ("color", colour, |v:String| v.parse().ok()),
                 ("name", name, |v:String| v.into()),
+                ("parallaxx", parallax_x, |v:String| v.parse().ok()),
+                ("parallaxy", parallax_y, |v:String| v.parse().ok()),
             ],
             required: [],
             TiledError::MalformedAttributes("object groups must have a name".to_string())
@@ -56,6 +60,8 @@ impl ObjectGroup {
             opacity: o.unwrap_or(1.0),
             visible: v.unwrap_or(true),
             objects: objects,
+            parallax_x: px.unwrap_or(1.0),
+            parallax_y: py.unwrap_or(1.0),
             colour: c,
             layer_index,
             properties,
