@@ -49,6 +49,8 @@ pub struct Layer {
     pub visible: bool,
     pub offset_x: f32,
     pub offset_y: f32,
+    pub parallax_x: f32,
+    pub parallax_y: f32,
     /// The tiles are arranged in rows. Each tile is a number which can be used
     ///  to find which tileset it belongs to and can then be rendered.
     pub tiles: LayerData,
@@ -64,13 +66,15 @@ impl Layer {
         layer_index: u32,
         infinite: bool,
     ) -> Result<Layer, TiledError> {
-        let ((o, v, ox, oy), n) = get_attrs!(
+        let ((o, v, ox, oy, px, py), n) = get_attrs!(
             attrs,
             optionals: [
                 ("opacity", opacity, |v:String| v.parse().ok()),
                 ("visible", visible, |v:String| v.parse().ok().map(|x:i32| x == 1)),
                 ("offsetx", offset_x, |v:String| v.parse().ok()),
                 ("offsety", offset_y, |v:String| v.parse().ok()),
+                ("parallaxx", parallax_x, |v:String| v.parse().ok()),
+                ("parallaxy", parallax_y, |v:String| v.parse().ok()),
             ],
             required: [
                 ("name", name, |v| Some(v)),
@@ -100,6 +104,8 @@ impl Layer {
             visible: v.unwrap_or(true),
             offset_x: ox.unwrap_or(0.0),
             offset_y: oy.unwrap_or(0.0),
+            parallax_x: px.unwrap_or(1.0),
+            parallax_y: py.unwrap_or(1.0),
             tiles: tiles,
             properties: properties,
             layer_index,
