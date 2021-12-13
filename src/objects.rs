@@ -22,6 +22,7 @@ pub struct ObjectGroup {
      */
     pub layer_index: Option<u32>,
     pub properties: Properties,
+    pub id: u32,
 }
 
 impl ObjectGroup {
@@ -30,7 +31,7 @@ impl ObjectGroup {
         attrs: Vec<OwnedAttribute>,
         layer_index: Option<u32>,
     ) -> Result<ObjectGroup, TiledError> {
-        let ((o, v, c, n, px, py), ()) = get_attrs!(
+        let ((o, v, c, n, px, py), id) = get_attrs!(
             attrs,
             optionals: [
                 ("opacity", opacity, |v:String| v.parse().ok()),
@@ -40,7 +41,9 @@ impl ObjectGroup {
                 ("parallaxx", parallax_x, |v:String| v.parse().ok()),
                 ("parallaxy", parallax_y, |v:String| v.parse().ok()),
             ],
-            required: [],
+            required: [
+                ("id", id, |v:String| v.parse::<u32>().ok()),
+            ],
             TiledError::MalformedAttributes("object groups must have a name".to_string())
         );
         let mut objects = Vec::new();
@@ -65,6 +68,7 @@ impl ObjectGroup {
             colour: c,
             layer_index,
             properties,
+            id,
         })
     }
 }
