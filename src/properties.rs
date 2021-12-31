@@ -45,6 +45,8 @@ pub enum PropertyValue {
     StringValue(String),
     /// Holds the path relative to the map or tileset
     FileValue(String),
+    /// Holds the id of a referenced object, or 0 if unset
+    ObjectValue(u32),
 }
 
 impl PropertyValue {
@@ -70,6 +72,10 @@ impl PropertyValue {
                 ))),
             },
             "string" => Ok(PropertyValue::StringValue(value)),
+            "object" => match value.parse() {
+                Ok(val) => Ok(PropertyValue::ObjectValue(val)),
+                Err(err) => Err(TiledError::Other(err.to_string())),
+            },
             "file" => Ok(PropertyValue::FileValue(value)),
             _ => Err(TiledError::Other(format!(
                 "Unknown property type \"{}\"",
@@ -116,4 +122,36 @@ pub(crate) fn parse_properties<R: Read>(
         },
     });
     Ok(p)
+}
+
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+pub enum Alignment {
+    TopLeft,
+    Top,
+    TopRight,
+    Left,
+    Center,
+    Right,
+    BottomLeft,
+    Bottom,
+    BottomRight,
+}
+
+impl FromStr for Alignment {
+    type Err = TiledError;
+
+    fn from_str(s: &str) -> Result<Alignment, TiledError> {
+        match s {
+            "topleft" => Ok(Self::TopLeft),
+            "top" => Ok(Self::Top),
+            "topright" => Ok(Self::TopRight),
+            "left" => Ok(Self::Left),
+            "center" => Ok(Self::Center),
+            "right" => Ok(Self::Right),
+            "bottomleft" => Ok(Self::BottomLeft),
+            "bottom" => Ok(Self::Bottom),
+            "bottomright" => Ok(Self::BottomRight),
+            _ => Err(TiledError::MalformedAttributes(format!("Invalid alignment type '{}'", s).to_string())),
+        }
+    }
 }
