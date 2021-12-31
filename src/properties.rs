@@ -123,3 +123,35 @@ pub(crate) fn parse_properties<R: Read>(
     });
     Ok(p)
 }
+
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+pub enum Alignment {
+    TopLeft,
+    Top,
+    TopRight,
+    Left,
+    Center,
+    Right,
+    BottomLeft,
+    Bottom,
+    BottomRight,
+}
+
+impl FromStr for Alignment {
+    type Err = TiledError;
+
+    fn from_str(s: &str) -> Result<Alignment, TiledError> {
+        match s {
+            "topleft" => Ok(Self::TopLeft),
+            "top" => Ok(Self::Top),
+            "topright" => Ok(Self::TopRight),
+            "left" => Ok(Self::Left),
+            "center" => Ok(Self::Center),
+            "right" => Ok(Self::Right),
+            "bottomleft" => Ok(Self::BottomLeft),
+            "bottom" => Ok(Self::Bottom),
+            "bottomright" => Ok(Self::BottomRight),
+            _ => Err(TiledError::MalformedAttributes(format!("Invalid alignment type '{}'", s).to_string())),
+        }
+    }
+}

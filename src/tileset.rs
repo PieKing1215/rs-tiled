@@ -1,4 +1,4 @@
-use crate::properties::{parse_properties, Properties};
+use crate::properties::{parse_properties, Properties, Alignment};
 use crate::util::*;
 use crate::*; // FIXME
 
@@ -18,6 +18,7 @@ pub struct Tileset {
     pub images: Vec<Image>,
     pub tiles: Vec<Tile>,
     pub properties: Properties,
+    pub object_alignment: Option<Alignment>,
 }
 
 impl Tileset {
@@ -33,12 +34,13 @@ impl Tileset {
         parser: &mut EventReader<R>,
         attrs: &Vec<OwnedAttribute>,
     ) -> Result<Tileset, TiledError> {
-        let ((spacing, margin, tilecount), (first_gid, name, width, height)) = get_attrs!(
+        let ((spacing, margin, tilecount, object_alignment), (first_gid, name, width, height)) = get_attrs!(
            attrs,
            optionals: [
                 ("spacing", spacing, |v:String| v.parse().ok()),
                 ("margin", margin, |v:String| v.parse().ok()),
                 ("tilecount", tilecount, |v:String| v.parse().ok()),
+                ("objectalignment", object_alignment, |v:String| v.parse().ok()),
             ],
            required: [
                 ("firstgid", first_gid, |v:String| v.parse().ok()),
@@ -78,6 +80,7 @@ impl Tileset {
             images,
             tiles,
             properties,
+            object_alignment,
         })
     }
 
@@ -138,12 +141,13 @@ impl Tileset {
         parser: &mut EventReader<R>,
         attrs: &Vec<OwnedAttribute>,
     ) -> Result<Tileset, TiledError> {
-        let ((spacing, margin, tilecount), (name, width, height)) = get_attrs!(
+        let ((spacing, margin, tilecount, object_alignment), (name, width, height)) = get_attrs!(
             attrs,
             optionals: [
                 ("spacing", spacing, |v:String| v.parse().ok()),
                 ("margin", margin, |v:String| v.parse().ok()),
                 ("tilecount", tilecount, |v:String| v.parse().ok()),
+                ("objectalignment", object_alignment, |v:String| v.parse().ok()),
             ],
             required: [
                 ("name", name, |v| Some(v)),
@@ -182,6 +186,7 @@ impl Tileset {
             images: images,
             tiles: tiles,
             properties,
+            object_alignment,
         })
     }
 }
